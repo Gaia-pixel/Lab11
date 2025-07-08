@@ -20,7 +20,7 @@ class Model:
         self.graph.add_nodes_from(allNodes)
         for n in allNodes:
             self.idmap[n.Product_number] = n
-        self.getAllArchi2(colore, anno)
+        self.getAllArchi3(anno)
 
     def getAllNodes(self):
         return self.graph.nodes()
@@ -51,12 +51,22 @@ class Model:
             else:
                 self.graph.add_edge(self.idmap[p1], self.idmap[p2], weight = 1)
 
+    def getAllArchi3(self, anno):
+        for n1 in self.graph.nodes():
+            for n2 in self.graph.nodes():
+                if n1.Product_number > n2.Product_number and not self.graph.has_edge(n1, n2):
+                    peso = DAO.getPeso(n1, n2, anno)
+                    if peso != 0:
+                        self.graph.add_edge(n1, n2, weight = peso)
+
 
     def getGraphDetails(self):
         return self.graph.number_of_nodes(), self.graph.number_of_edges()
 
     def getMaxCamminoArchi(self, prodotto):
         self.ricorsione([prodotto])
+        for i in range(len(self.bestCammino)-1):
+            print(self.bestCammino[i], self.bestCammino[i+1])
         return len(self.bestCammino)-1
 
     def ricorsione(self, parziale):
@@ -75,6 +85,6 @@ class Model:
             return True
         nodo1 = parziale[-1]
         nodo2 = parziale[len(parziale)-2]
-        if self.graph[nodo1][v]['weight'] > self.graph[nodo1][nodo2]['weight']:
+        if self.graph[nodo1][v]['weight'] >= self.graph[nodo1][nodo2]['weight'] and v != nodo2:
             return True
         return False

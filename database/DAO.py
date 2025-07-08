@@ -108,3 +108,29 @@ class DAO():
 
         return result
 
+    @staticmethod
+    def getPeso(n1, n2, anno):
+        cnx = DBConnect.get_connection()
+        result = []
+        if cnx is None:
+            print("Connessione fallita")
+        else:
+            cursor = cnx.cursor(dictionary=True)
+            query = """SELECT COUNT(DISTINCT gds1.`Date`) as peso
+                        FROM go_daily_sales gds1, go_daily_sales gds2
+                        WHERE gds1.Product_number = %s
+                                and gds2.Product_number = %s
+                                and gds1.`Date` = gds2.`Date`
+                                and year(gds1.Date) = %s
+                                and gds1.Retailer_code = gds2.Retailer_code
+                                       """
+            cursor.execute(query, (n1.Product_number, n2.Product_number, anno))
+
+            for row in cursor:
+                result.append(row['peso'])
+
+            cursor.close()
+            cnx.close()
+
+        return result[0]
+
